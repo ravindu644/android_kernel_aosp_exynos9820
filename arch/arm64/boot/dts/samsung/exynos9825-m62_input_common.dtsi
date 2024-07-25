@@ -102,7 +102,6 @@
 		sec,max_coords = <4096 4096>; /* x y */
 
 		enable_settings_aot;
-		support_dex_mode;
 		support_fod;
 		support_mis_calibration_test;
 		support_ear_detect_mode;

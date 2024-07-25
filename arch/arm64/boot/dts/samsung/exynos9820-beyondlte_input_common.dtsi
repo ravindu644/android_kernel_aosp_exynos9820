@@ -110,7 +110,6 @@
 		sec,regulator_avdd = "tsp_avdd";
 		sec,regulator_boot_on;
 		sec,tclm_level = <1>;
-		support_dex_mode;
 		enable_settings_aot;
 		support_ear_detect_mode;
 		sync-reportrate-120 = "Y";

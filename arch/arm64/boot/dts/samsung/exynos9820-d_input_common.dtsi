@@ -133,7 +133,6 @@
 		sec,project_name = "DAVINCI", "N970";
 		sec,tclm_level = <1>;
 //		sec,afe_base = <0x0000>;
-		support_dex_mode;
 		enable_settings_aot;
 		sec,area-size = <133 266 341>;
 		support_ear_detect_mode;
