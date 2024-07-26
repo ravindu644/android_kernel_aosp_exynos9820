@@ -2145,6 +2145,10 @@ static int bpf_skb_proto_4_to_6(struct sk_buff *skb)
 	u32 off = skb_mac_header_len(skb);
 	int ret;
 
+	/* SCTP uses GSO_BY_FRAGS, thus cannot adjust it. */
+	if (skb_is_gso(skb) && unlikely(skb_is_gso_sctp(skb)))
+		return -ENOTSUPP;
+
 	ret = skb_cow(skb, len_diff);
 	if (unlikely(ret < 0))
 		return ret;
@@ -2154,15 +2158,19 @@ static int bpf_skb_proto_4_to_6(struct sk_buff *skb)
 		return ret;
 
 	if (skb_is_gso(skb)) {
-		/* SKB_GSO_TCPV4 needs to be changed into SKB_GSO_TCPV6. */
-		if (skb_shinfo(skb)->gso_type & SKB_GSO_TCPV4) {
-			skb_shinfo(skb)->gso_type &= ~SKB_GSO_TCPV4;
-			skb_shinfo(skb)->gso_type |=  SKB_GSO_TCPV6;
+		struct skb_shared_info *shinfo = skb_shinfo(skb);
+
+		/* SKB_GSO_TCPV4 needs to be changed into
+		 * SKB_GSO_TCPV6.
+		 */
+		if (shinfo->gso_type & SKB_GSO_TCPV4) {
+			shinfo->gso_type &= ~SKB_GSO_TCPV4;
+			shinfo->gso_type |=  SKB_GSO_TCPV6;
 		}
 
 		/* Header must be checked, and gso_segs recomputed. */
-		skb_shinfo(skb)->gso_type |= SKB_GSO_DODGY;
-		skb_shinfo(skb)->gso_segs = 0;
+		shinfo->gso_type |= SKB_GSO_DODGY;
+		shinfo->gso_segs = 0;
 	}
 
 	skb->protocol = htons(ETH_P_IPV6);
@@ -2177,6 +2185,10 @@ static int bpf_skb_proto_6_to_4(struct sk_buff *skb)
 	u32 off = skb_mac_header_len(skb);
 	int ret;
 
+	/* SCTP uses GSO_BY_FRAGS, thus cannot adjust it. */
+	if (skb_is_gso(skb) && unlikely(skb_is_gso_sctp(skb)))
+		return -ENOTSUPP;
+
 	ret = skb_unclone(skb, GFP_ATOMIC);
 	if (unlikely(ret < 0))
 		return ret;
@@ -2186,15 +2198,19 @@ static int bpf_skb_proto_6_to_4(struct sk_buff *skb)
 		return ret;
 
 	if (skb_is_gso(skb)) {
-		/* SKB_GSO_TCPV6 needs to be changed into SKB_GSO_TCPV4. */
-		if (skb_shinfo(skb)->gso_type & SKB_GSO_TCPV6) {
-			skb_shinfo(skb)->gso_type &= ~SKB_GSO_TCPV6;
-			skb_shinfo(skb)->gso_type |=  SKB_GSO_TCPV4;
+		struct skb_shared_info *shinfo = skb_shinfo(skb);
+
+		/* SKB_GSO_TCPV6 needs to be changed into
+		 * SKB_GSO_TCPV4.
+		 */
+		if (shinfo->gso_type & SKB_GSO_TCPV6) {
+			shinfo->gso_type &= ~SKB_GSO_TCPV6;
+			shinfo->gso_type |=  SKB_GSO_TCPV4;
 		}
 
 		/* Header must be checked, and gso_segs recomputed. */
-		skb_shinfo(skb)->gso_type |= SKB_GSO_DODGY;
-		skb_shinfo(skb)->gso_segs = 0;
+		shinfo->gso_type |= SKB_GSO_DODGY;
+		shinfo->gso_segs = 0;
 	}
 
 	skb->protocol = htons(ETH_P_IP);
@@ -2293,6 +2309,10 @@ static int bpf_skb_net_grow(struct sk_buff *skb, u32 len_diff)
 	u32 off = skb_mac_header_len(skb) + bpf_skb_net_base_len(skb);
 	int ret;
 
+	/* SCTP uses GSO_BY_FRAGS, thus cannot adjust it. */
+	if (skb_is_gso(skb) && unlikely(skb_is_gso_sctp(skb)))
+		return -ENOTSUPP;
+
 	ret = skb_cow(skb, len_diff);
 	if (unlikely(ret < 0))
 		return ret;
@@ -2302,11 +2322,13 @@ static int bpf_skb_net_grow(struct sk_buff *skb, u32 len_diff)
 		return ret;
 
 	if (skb_is_gso(skb)) {
+		struct skb_shared_info *shinfo = skb_shinfo(skb);
+
 		/* Due to header grow, MSS needs to be downgraded. */
-		skb_shinfo(skb)->gso_size -= len_diff;
+		skb_decrease_gso_size(shinfo, len_diff);
 		/* Header must be checked, and gso_segs recomputed. */
-		skb_shinfo(skb)->gso_type |= SKB_GSO_DODGY;
-		skb_shinfo(skb)->gso_segs = 0;
+		shinfo->gso_type |= SKB_GSO_DODGY;
+		shinfo->gso_segs = 0;
 	}
 
 	return 0;
@@ -2317,6 +2339,10 @@ static int bpf_skb_net_shrink(struct sk_buff *skb, u32 len_diff)
 	u32 off = skb_mac_header_len(skb) + bpf_skb_net_base_len(skb);
 	int ret;
 
+	/* SCTP uses GSO_BY_FRAGS, thus cannot adjust it. */
+	if (skb_is_gso(skb) && unlikely(skb_is_gso_sctp(skb)))
+		return -ENOTSUPP;
+
 	ret = skb_unclone(skb, GFP_ATOMIC);
 	if (unlikely(ret < 0))
 		return ret;
@@ -2326,11 +2352,13 @@ static int bpf_skb_net_shrink(struct sk_buff *skb, u32 len_diff)
 		return ret;
 
 	if (skb_is_gso(skb)) {
+		struct skb_shared_info *shinfo = skb_shinfo(skb);
+
 		/* Due to header shrink, MSS can be upgraded. */
-		skb_shinfo(skb)->gso_size += len_diff;
+		skb_increase_gso_size(shinfo, len_diff);
 		/* Header must be checked, and gso_segs recomputed. */
-		skb_shinfo(skb)->gso_type |= SKB_GSO_DODGY;
-		skb_shinfo(skb)->gso_segs = 0;
+		shinfo->gso_type |= SKB_GSO_DODGY;
+		shinfo->gso_segs = 0;
 	}
 
 	return 0;
@@ -3866,6 +3894,8 @@ static bool sock_addr_is_valid_access(int off, int size,
 		switch (prog->expected_attach_type) {
 		case BPF_CGROUP_INET4_BIND:
 		case BPF_CGROUP_INET4_CONNECT:
+		case BPF_CGROUP_UDP4_SENDMSG:
+		case BPF_CGROUP_UDP4_RECVMSG:
 			break;
 		default:
 			return false;
@@ -3875,6 +3905,25 @@ static bool sock_addr_is_valid_access(int off, int size,
 		switch (prog->expected_attach_type) {
 		case BPF_CGROUP_INET6_BIND:
 		case BPF_CGROUP_INET6_CONNECT:
+		case BPF_CGROUP_UDP6_SENDMSG:
+		case BPF_CGROUP_UDP6_RECVMSG:
+			break;
+		default:
+			return false;
+		}
+		break;
+	case bpf_ctx_range(struct bpf_sock_addr, msg_src_ip4):
+		switch (prog->expected_attach_type) {
+		case BPF_CGROUP_UDP4_SENDMSG:
+			break;
+		default:
+			return false;
+		}
+		break;
+	case bpf_ctx_range_till(struct bpf_sock_addr, msg_src_ip6[0],
+				msg_src_ip6[3]):
+		switch (prog->expected_attach_type) {
+		case BPF_CGROUP_UDP6_SENDMSG:
 			break;
 		default:
 			return false;
@@ -3885,6 +3934,9 @@ static bool sock_addr_is_valid_access(int off, int size,
 	switch (off) {
 	case bpf_ctx_range(struct bpf_sock_addr, user_ip4):
 	case bpf_ctx_range_till(struct bpf_sock_addr, user_ip6[0], user_ip6[3]):
+	case bpf_ctx_range(struct bpf_sock_addr, msg_src_ip4):
+	case bpf_ctx_range_till(struct bpf_sock_addr, msg_src_ip6[0],
+				msg_src_ip6[3]):
 		/* Only narrow read access allowed for now. */
 		if (type == BPF_READ) {
 			bpf_ctx_record_field_size(info, size_default);
@@ -4559,6 +4611,23 @@ static u32 sock_addr_convert_ctx_access(enum bpf_access_type type,
 		*insn++ = BPF_ALU32_IMM(BPF_AND, si->dst_reg, SK_FL_PROTO_MASK);
 		*insn++ = BPF_ALU32_IMM(BPF_RSH, si->dst_reg,
 					SK_FL_PROTO_SHIFT);
+		break;
+
+	case offsetof(struct bpf_sock_addr, msg_src_ip4):
+		/* Treat t_ctx as struct in_addr for msg_src_ip4. */
+		SOCK_ADDR_LOAD_OR_STORE_NESTED_FIELD_SIZE_OFF(
+			struct bpf_sock_addr_kern, struct in_addr, t_ctx,
+			s_addr, BPF_SIZE(si->code), 0, tmp_reg);
+		break;
+
+	case bpf_ctx_range_till(struct bpf_sock_addr, msg_src_ip6[0],
+				msg_src_ip6[3]):
+		off = si->off;
+		off -= offsetof(struct bpf_sock_addr, msg_src_ip6[0]);
+		/* Treat t_ctx as struct in6_addr for msg_src_ip6. */
+		SOCK_ADDR_LOAD_OR_STORE_NESTED_FIELD_SIZE_OFF(
+			struct bpf_sock_addr_kern, struct in6_addr, t_ctx,
+			s6_addr32[0], BPF_SIZE(si->code), off, tmp_reg);
 		break;
 	}
 
