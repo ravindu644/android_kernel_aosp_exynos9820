@@ -31,6 +31,31 @@
 #define V4L2_CID_CSC_EQ			(V4L2_CID_EXYNOS_BASE + 101)
 #define V4L2_CID_CSC_RANGE		(V4L2_CID_EXYNOS_BASE + 102)
 
+/* for hardware/samsung_slsi-linaro/exynos inclusion */
+#define V4L2_PIX_FMT_NV12N v4l2_fourcc('N', 'N', '1', '2')
+#define V4L2_PIX_FMT_NV12NT v4l2_fourcc('T', 'N', '1', '2')
+#define V4L2_PIX_FMT_YUV420N v4l2_fourcc('Y', 'N', '1', '2')
+#define V4L2_PIX_FMT_NV12N_10B v4l2_fourcc('B', 'N', '1', '2')
+#define V4L2_PIX_FMT_NV12M_S10B v4l2_fourcc('B', 'M', '1', '2')
+#define V4L2_PIX_FMT_NV21M_S10B v4l2_fourcc('B', 'M', '2', '1')
+#define V4L2_PIX_FMT_NV16M_S10B v4l2_fourcc('B', 'M', '1', '6')
+#define V4L2_PIX_FMT_NV61M_S10B v4l2_fourcc('B', 'M', '6', '1')
+#define V4L2_PIX_FMT_NV12M_P010 v4l2_fourcc('P', 'M', '1', '2')
+#define V4L2_PIX_FMT_NV21M_P010 v4l2_fourcc('P', 'M', '2', '1')
+#define V4L2_PIX_FMT_NV16M_P210 v4l2_fourcc('P', 'M', '1', '6')
+#define V4L2_PIX_FMT_NV61M_P210 v4l2_fourcc('P', 'M', '6', '1')
+#define V4L2_PIX_FMT_NV12_P010 v4l2_fourcc('P', 'N', '1', '2')
+#define V4L2_PIX_FMT_NV12M_SBWC_8B  v4l2_fourcc('M', '1', 'S', '8')
+#define V4L2_PIX_FMT_NV12M_SBWC_10B v4l2_fourcc('M', '1', 'S', '1')
+#define V4L2_PIX_FMT_NV21M_SBWC_8B  v4l2_fourcc('M', '2', 'S', '8')
+#define V4L2_PIX_FMT_NV21M_SBWC_10B v4l2_fourcc('M', '2', 'S', '1')
+#define V4L2_PIX_FMT_NV12N_SBWC_8B  v4l2_fourcc('N', '1', 'S', '8')
+#define V4L2_PIX_FMT_NV12N_SBWC_10B v4l2_fourcc('N', '1', 'S', '1')
+#define V4L2_PIX_FMT_NV12M_SBWCL_8B v4l2_fourcc('M', '1', 'L', '8')
+#define V4L2_PIX_FMT_NV12M_SBWCL_10B    v4l2_fourcc('M', '1', 'L', '1')
+#define V4L2_PIX_FMT_NV12N_SBWCL_8B v4l2_fourcc('N', '1', 'L', '8')
+#define V4L2_PIX_FMT_NV12N_SBWCL_10B    v4l2_fourcc('N', '1', 'L', '1')
+
 /* for DRM playback scenario */
 #define V4L2_CID_CONTENT_PROTECTION	(V4L2_CID_EXYNOS_BASE + 201)
 
