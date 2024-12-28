@@ -45,7 +45,7 @@ struct ctl_table_header;
 struct net_generic;
 struct sock;
 struct netns_ipvs;
-
+struct bpf_prog;
 
 #define NETDEV_HASHBITS    8
 #define NETDEV_HASHENTRIES (1 << NETDEV_HASHBITS)
@@ -142,6 +142,8 @@ struct net {
 	struct sk_buff_head	wext_nlevents;
 #endif
 	struct net_generic __rcu	*gen;
+
+	struct bpf_prog __rcu	*flow_dissector_prog;
 
 	/* Note : following structs are cache line aligned */
 #ifdef CONFIG_XFRM
@@ -316,7 +318,26 @@ struct net *get_net_ns_by_id(struct net *net, int id);
 
 struct pernet_operations {
 	struct list_head list;
+	/*
+	 * Below methods are called without any exclusive locks.
+	 * More than one net may be constructed and destructed
+	 * in parallel on several cpus. Every pernet_operations
+	 * have to keep in mind all other pernet_operations and
+	 * to introduce a locking, if they share common resources.
+	 *
+	 * Exit methods using blocking RCU primitives, such as
+	 * synchronize_rcu(), should be implemented via exit_batch.
+	 * Then, destruction of a group of net requires single
+	 * synchronize_rcu() related to these pernet_operations,
+	 * instead of separate synchronize_rcu() for every net.
+	 * Please, avoid synchronize_rcu() at all, where it's possible.
+	 *
+	 * Note that a combination of pre_exit() and exit() can
+	 * be used, since a synchronize_rcu() is guaranteed between
+	 * the calls.
+	 */
 	int (*init)(struct net *net);
+	void (*pre_exit)(struct net *net);
 	void (*exit)(struct net *net);
 	void (*exit_batch)(struct list_head *net_exit_list);
 	unsigned int *id;
