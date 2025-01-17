@@ -79,7 +79,6 @@ CLANG_TRIPLE=aarch64-linux-gnu- \
 #build kernel image
 build_kernel(){
     cd "${RDIR}"
-    #make ${ARGS} clean && make ${ARGS} mrproper
     make ${ARGS} "${KERNEL_DEFCONFIG}"
     make ${ARGS} menuconfig
     make ${ARGS}|| exit 1
