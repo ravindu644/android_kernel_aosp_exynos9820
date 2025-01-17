@@ -15,6 +15,12 @@ declare -A DEVICES=(
     [beyond1lte]="exynos9820-beyond1lte_defconfig"
     [beyond0lte]="exynos9820-beyond0lte_defconfig"
     [beyondx]="exynos9820-beyondx_defconfig"
+
+    [d1]="exynos9820-d1_defconfig"
+    [d1x]="exynos9820-d1x_defconfig"
+    [d2s]="exynos9820-d2s_defconfig"
+    [d2x]="exynos9820-d2x_defconfig"
+    [f62]="exynos9820-f62_defconfig"       
 )
 
 # Set device-specific variables

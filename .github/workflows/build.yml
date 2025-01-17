@@ -14,7 +14,7 @@ jobs:
       contents: write
     strategy:
       matrix:
-        device: [beyond2lte, beyond1lte, beyond0lte, beyondx]
+        device: [beyond2lte, beyond1lte, beyond0lte, beyondx, d1, d1x, d2s, d2x, f62]
 
     steps:
       - name: Checkout source
@@ -65,4 +65,3 @@ jobs:
           token: ${{ secrets.TOKEN }}          
           artifacts: "artifacts/**/*.zip"
           body: "Commit SHA: ${{ github.sha }}"
-          
