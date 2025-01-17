@@ -87,7 +87,7 @@ CLANG_TRIPLE=aarch64-linux-gnu- \
 #build kernel image
 build_kernel(){
     cd "${RDIR}"
-    make ${ARGS} "${KERNEL_DEFCONFIG}" custom.config
+    make ${ARGS} "${KERNEL_DEFCONFIG}" custom.config version.config
     make ${ARGS} menuconfig
     make ${ARGS}|| exit 1
     cp ${RDIR}/out/arch/arm64/boot/Image* ${RDIR}/build
