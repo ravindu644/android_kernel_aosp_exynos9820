@@ -60,11 +60,18 @@ CLANG_TRIPLE=aarch64-linux-gnu- \
 #build kernel image
 build_kernel(){
     cd "${RDIR}"
-    make ${ARGS} clean && make ${ARGS} mrproper
+    #make ${ARGS} clean && make ${ARGS} mrproper
     make ${ARGS} exynos9820-beyondx_defconfig
     make ${ARGS} menuconfig
     make ${ARGS}|| exit 1
     cp ${RDIR}/out/arch/arm64/boot/Image* ${RDIR}/build
 }
 
+#build anykernel zip
+build_anykernel3(){
+    rm -f ${RDIR}/AnyKernel3/Image && cp ${RDIR}/build/Image ${RDIR}/AnyKernel3
+    cd ${RDIR}/AnyKernel3 && zip -r "../build/KernelSU-Next-beyondx-anykernel3-AOSP.zip" * && cd ${RDIR}
+}
+
 build_kernel
+build_anykernel3
