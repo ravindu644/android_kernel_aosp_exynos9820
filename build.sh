@@ -32,7 +32,7 @@ if [ -z "$BUILD_KERNEL_VERSION" ]; then
 fi
 
 #setting up localversion
-echo -e "CONFIG_LOCALVERSION_AUTO=n\nCONFIG_LOCALVERSION=\"-ravindu644-${BUILD_KERNEL_VERSION}\"\n" > "${RDIR}/arch/arm64/configs/version.config"
+echo -e "CONFIG_LOCALVERSION_AUTO=n\nCONFIG_LOCALVERSION=\"-ravindu644-${BUILD_KERNEL_VERSION}-openela\"\n" > "${RDIR}/arch/arm64/configs/version.config"
 
 #install requirements
 sudo apt install libarchive-tools zstd -y
@@ -96,7 +96,7 @@ build_kernel(){
 #build anykernel zip
 build_anykernel3(){
     rm -f ${RDIR}/AnyKernel3/Image && cp ${RDIR}/build/Image ${RDIR}/AnyKernel3
-    cd ${RDIR}/AnyKernel3 && zip -r "../build/KernelSU-Next-${MODEL}-anykernel3-AOSP.zip" * && cd ${RDIR}
+    cd ${RDIR}/AnyKernel3 && zip -r "../build/KernelSU-Next-${MODEL}-${BUILD_KERNEL_VERSION}-anykernel3-AOSP.zip" * && cd ${RDIR}
     echo -e "\n[i] Build finished..!\n"
 }
 
