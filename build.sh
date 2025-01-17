@@ -3,9 +3,28 @@
 #init submodules
 git submodule init && git submodule update
 
+#main variables
+export MODEL=$1
 export ARCH=arm64
 export RDIR="$(pwd)"
 export KBUILD_BUILD_USER="@ravindu644"
+
+# Device configuration
+declare -A DEVICES=(
+    [beyond2lte]="exynos9820-beyond2lte_defconfig"
+    [beyond1lte]="exynos9820-beyond1lte_defconfig"
+    [beyond0lte]="exynos9820-beyond0lte_defconfig"
+    [beyondx]="exynos9820-beyondx_defconfig"
+)
+
+# Set device-specific variables
+if [[ -v DEVICES[$MODEL] ]]; then
+    read KERNEL_DEFCONFIG <<< "${DEVICES[$MODEL]}"
+    echo -e "\n[i] Building with ${KERNEL_DEFCONFIG}..\n"
+else
+    echo -e "\n[!] Unknown device: $MODEL, setting to beyond2lte\n"
+    read KERNEL_DEFCONFIG <<< "${DEVICES[beyond2lte]}"
+fi
 
 #install requirements
 sudo apt install libarchive-tools zstd -y
@@ -60,8 +79,8 @@ CLANG_TRIPLE=aarch64-linux-gnu- \
 #build kernel image
 build_kernel(){
     cd "${RDIR}"
-    make ${ARGS} clean && make ${ARGS} mrproper
-    make ${ARGS} exynos9820-beyondx_defconfig
+    #make ${ARGS} clean && make ${ARGS} mrproper
+    make ${ARGS} "${KERNEL_DEFCONFIG}"
     make ${ARGS} menuconfig
     make ${ARGS}|| exit 1
     cp ${RDIR}/out/arch/arm64/boot/Image* ${RDIR}/build
@@ -70,7 +89,8 @@ build_kernel(){
 #build anykernel zip
 build_anykernel3(){
     rm -f ${RDIR}/AnyKernel3/Image && cp ${RDIR}/build/Image ${RDIR}/AnyKernel3
-    cd ${RDIR}/AnyKernel3 && zip -r "../build/KernelSU-Next-beyondx-anykernel3-AOSP.zip" * && cd ${RDIR}
+    cd ${RDIR}/AnyKernel3 && zip -r "../build/KernelSU-Next-${MODEL}-anykernel3-AOSP.zip" * && cd ${RDIR}
+    echo -e "\n[i] Build finished..!\n"
 }
 
 build_kernel
