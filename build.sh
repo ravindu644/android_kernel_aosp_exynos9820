@@ -60,7 +60,7 @@ CLANG_TRIPLE=aarch64-linux-gnu- \
 #build kernel image
 build_kernel(){
     cd "${RDIR}"
-    #make ${ARGS} clean && make ${ARGS} mrproper
+    make ${ARGS} clean && make ${ARGS} mrproper
     make ${ARGS} exynos9820-beyondx_defconfig
     make ${ARGS} menuconfig
     make ${ARGS}|| exit 1
