@@ -26,6 +26,14 @@ else
     read KERNEL_DEFCONFIG <<< "${DEVICES[beyond2lte]}"
 fi
 
+#dev
+if [ -z "$BUILD_KERNEL_VERSION" ]; then
+    export BUILD_KERNEL_VERSION="dev"
+fi
+
+#setting up localversion
+echo -e "CONFIG_LOCALVERSION_AUTO=n\nCONFIG_LOCALVERSION=\"-ravindu644-${BUILD_KERNEL_VERSION}\"\n" > "${RDIR}/arch/arm64/configs/version.config"
+
 #install requirements
 sudo apt install libarchive-tools zstd -y
 
